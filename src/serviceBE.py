@@ -1,10 +1,9 @@
 import sys
 sys.path.append('gen-py')
 
-from BackEnd import Client
+from project.BackEnd import Client
 from model import Net
 import torch
-from splitData import DataSampler
 from torch.utils.data import Subset
 from torch import optim
 import torch.functional as F

@@ -9,7 +9,7 @@ from thrift.protocol import TBinaryProtocol
 import argparse
 
 
-class Client:
+class Experiment:
     def __init__(self, hostName, portFE, epochs):
         self.hostName = hostName
         self.portFE = portFE
@@ -37,7 +37,7 @@ def main():
                         help='number of epochs (default: 5)')
 
     args = parser.parse_args()
-    node = Client(args.host, args.portFE, args.epochs)
+    node = Experiment(args.host, args.portFE, args.epochs)
     node.run()
 
 
