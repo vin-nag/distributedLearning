@@ -1,8 +1,22 @@
+"""
+This file contains the code for the back-end service.
+
+Date:
+    December 10, 2020
+
+Project:
+    ECE751 Final Project: Distributed Neural Network Learning
+
+Authors:
+    name: Vineel Nagisetty, Husayn Kara
+    contact: vineel.nagisetty@uwaterloo.ca
+"""
+
 import sys
 sys.path.append('gen-py')
 
 from project.BackEnd import Client
-from model import Net
+from utils.models import Net
 import torch
 from torch.utils.data import Subset
 from torch import optim

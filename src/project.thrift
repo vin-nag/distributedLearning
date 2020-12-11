@@ -11,7 +11,7 @@ struct ResultBE {
 
 service FrontEnd {
     ResultFE trainNetwork (1: i16 epochs );
-    oneway void registerNode (1: string hostVal, 2: i32 portNum);
+    bool registerNode (1: string hostVal, 2: i16 portNum);
 }
 
 service BackEnd {

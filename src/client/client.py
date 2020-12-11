@@ -1,7 +1,21 @@
-import sys
-sys.path.append("gen-py")
+"""
+This file contains the code for the client server.
 
-from project.FrontEnd import Client
+Date:
+    December 10, 2020
+
+Project:
+    ECE751 Final Project: Distributed Neural Network Learning
+
+Authors:
+    name: Vineel Nagisetty, Husayn Kara
+    contact: vineel.nagisetty@uwaterloo.ca
+"""
+
+import sys
+sys.path.append("../gen-py")
+
+from project import FrontEnd
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
@@ -9,7 +23,7 @@ from thrift.protocol import TBinaryProtocol
 import argparse
 
 
-class Experiment:
+class Client:
     def __init__(self, hostName, portFE, epochs):
         self.hostName = hostName
         self.portFE = portFE
@@ -19,7 +33,7 @@ class Experiment:
         trans = TSocket.TSocket(self.hostName, self.portFE)
         trans = TTransport.TBufferedTransport(trans)
         proto = TBinaryProtocol.TBinaryProtocol(trans)
-        client = Client(proto)
+        client = FrontEnd.Client(proto)
 
         trans.open()
         result = client.trainNetwork(self.epochs)
@@ -37,7 +51,7 @@ def main():
                         help='number of epochs (default: 5)')
 
     args = parser.parse_args()
-    node = Experiment(args.host, args.portFE, args.epochs)
+    node = Client(args.host, args.portFE, args.epochs)
     node.run()
 
 

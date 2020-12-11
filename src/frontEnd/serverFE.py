@@ -1,5 +1,19 @@
+"""
+This file contains the code for the front-end server.
+
+Date:
+    December 10, 2020
+
+Project:
+    ECE751 Final Project: Distributed Neural Network Learning
+
+Authors:
+    name: Vineel Nagisetty, Husayn Kara
+    contact: vineel.nagisetty@uwaterloo.ca
+"""
+
 import sys
-sys.path.append("gen-py")
+sys.path.append("../gen-py")
 
 from project.FrontEnd import Processor
 from thrift.transport import TSocket
@@ -11,7 +25,7 @@ from serviceFE import FrontEndHandler
 import argparse
 
 
-class FENode:
+class FENodeServer:
     def __init__(self, portFE):
         self.portFE = portFE
 
@@ -27,13 +41,12 @@ class FENode:
         server.serve()
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Front End Server for Distributed Neural Network Learning')
     parser.add_argument('--port', type=int, default=9090, metavar='N',
                         help='port number (default: 9090)')
     args = parser.parse_args()
-    node = FENode(args.port)
+    node = FENodeServer(args.port)
     node.run()
 
 
