@@ -14,14 +14,21 @@ Authors:
 
 from utils.models import Net
 import torch
+import copy
+
 
 def aggregateFeedback(stateDictFiles, method="default"):
     if method == "default":
-        # model, model2, model3 = Net(), Net(), Net()
-        # model.load_state_dict({
-        #     k: (v1 + v2) / 2 for (k, v1), (_, v2) in zip(model2.load_state_dict(torch.load(stateDictFiles[0])).items(),
-        #                                                  model3.load_state_dict(torch.load(stateDictFiles[1].items())))
-        # })
+        numWorkers = len(stateDictFiles)
+        stateDicts = [torch.load(file) for file in stateDictFiles]
+        averageStateDict = copy.deepcopy(stateDicts[0])
+
+        for k,v in averageStateDict.items():
+            v = 0
+            for state in stateDicts:
+                v += state[k]
+            v /= numWorkers
+        print('completed aggregation')
         model = Net()
-        model.load_state_dict(torch.load(stateDictFiles[0]))
+        model.load_state_dict(averageStateDict)
         return model

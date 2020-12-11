@@ -55,31 +55,14 @@ class FrontEndHandler(Client):
             print(f"{hostVal}: {portNum} already in node list")
             return False
 
-    async def delegateEachWork(self, key, modelFile, indices, outputFile):
+    def delegateEachWork(self, key, modelFile, indices, outputFile):
         transport = self.nodeMap[key].getTransport()
         if not transport.isOpen():
             transport.open()
         client = self.nodeMap[key].getClient()
         return client.trainNetworkBE(modelFile, indices, outputFile)
 
-    async def delegateWork(self, keys, modelFile):
-        tasks = []
-        numWorkers = len(keys)
-        indices = splitData(60000, numWorkers=numWorkers)
-        outputFiles = [f"./../data/state{self.nodeMap[key].getInfo()}.pt" for key in keys]
-        for i in range(numWorkers):
-            tasks.append(asyncio.create_task(self.delegateEachWork(keys[i], modelFile, indices[i], outputFiles[i])))
-            print('task added')
-        for task in tasks:
-            await task
-        # return await asyncio.gather(*[self.delegateEachWork(keys[i], modelFile, indices[i], outputFiles[i]) for i in range(numWorkers)])
-        return
-
     def trainNetwork(self, epochs):
-
-        start_time = time.time()
-
-        time_taken = 0
 
         # experiment constants
         batch_size = 64
@@ -94,7 +77,7 @@ class FrontEndHandler(Client):
         print(numOfWorkers)
 
         keys = list(self.nodeMap.keys())
-        indices = splitData(60000, numWorkers=numOfWorkers)
+        indices = splitData(6000, numWorkers=numOfWorkers)
         outputFiles = [f"./../data/state{self.nodeMap[key].getInfo()}.pt" for key in keys]
         clients = [self.nodeMap[key].getClient() for key in keys]
 
@@ -108,30 +91,40 @@ class FrontEndHandler(Client):
 
         accuracy = []
 
+        start_time = time.time()
         for j in range(epochs):
+
             # train the model
             model.train()
             print(f"epoch: {j+1}")
 
-            loop = asyncio.new_event_loop()
-            result = loop.run_until_complete(self.delegateWork(keys, modelFile))
+            with ThreadPoolExecutor(max_workers=epochs*numOfWorkers) as executor:
+                loss = []
+                future_to_BE = {executor.submit(self.delegateEachWork, keys[i], modelFile, indices[i], outputFiles[i]): i for i in range(numOfWorkers)}
+                for future in concurrent.futures.as_completed(future_to_BE):
+                    result = future_to_BE[future]
+                    try:
+                        loss.append(future.result())
+                    except Exception as exc:
+                        print(f"generated exception {ex}")
 
             model = aggregateFeedback(outputFiles)
             save(model.state_dict(), modelFile)
 
-        loop.close()
-        # test the model
-        model.eval()
-        test_loss = 0
-        correct = 0
-        with torch.no_grad():
-            for data, target in test_loader:
-                output = model(data)
-                pred = output.argmax(dim=1, keepdim=True)
-                correct += pred.eq(target.view_as(pred)).sum().item()
-        val = 100. * correct / len(test_loader.dataset)
-        print(f"epoch: {j+1} accuracy: {val}")
-        accuracy.append(val)
+            # test the model
+            model.eval()
+            test_loss = 0
+            correct = 0
+            with torch.no_grad():
+                for data, target in test_loader:
+                    output = model(data)
+                    pred = output.argmax(dim=1, keepdim=True)
+                    correct += pred.eq(target.view_as(pred)).sum().item()
+            val = 100. * correct / len(test_loader.dataset)
+            print(f"epoch: {j+1} accuracy: {val}")
+            accuracy.append(val)
 
         print(accuracy, time.time() - start_time)
+
+        return ResultFE(accuracy, time.time() - start_time)
 
