@@ -19,7 +19,7 @@ from project.FrontEnd import Processor
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+from thrift.server import TServer, TNonblockingServer
 from serviceFE import FrontEndHandler
 
 import argparse
@@ -33,9 +33,9 @@ class FENodeServer:
         handler = FrontEndHandler()
         proc = Processor(handler)
         trans_svr = TSocket.TServerSocket(port=self.portFE)
-        trans_fac = TTransport.TBufferedTransportFactory()
+        trans_fac = TTransport.TFramedTransportFactory()
         proto_fac = TBinaryProtocol.TBinaryProtocolFactory()
-        server = TServer.TSimpleServer(proc, trans_svr, trans_fac, proto_fac)
+        server = TNonblockingServer.TNonblockingServer(proc, trans_svr, proto_fac)
 
         print(f"[Server] Started on port {self.portFE}")
         server.serve()

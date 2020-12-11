@@ -17,13 +17,14 @@ sys.path.append("../gen-py")
 sys.path.append("../../src")
 
 from project.BackEnd import Processor
-from thrift.transport import TSocket
+from thrift.transport import TSocket, TSSLSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
+from thrift.server import TServer, TNonblockingServer
 from project.BackEnd import Client as ClientBE
 from project.FrontEnd import Client as ClientFE
 from backEnd.serviceBE import BackEndHandler
+import aiothrift
 import socket
 import argparse
 
@@ -37,7 +38,7 @@ class BENodeServer:
 
     def signalFrontEnd(self):
         sock = TSocket.TSocket(host=self.hostFE, port=self.portFE)
-        transport = TTransport.TBufferedTransport(sock)
+        transport = TTransport.TFramedTransport(sock)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
         client = ClientFE(protocol)
         transport.open()
@@ -47,41 +48,19 @@ class BENodeServer:
             print("Succesful")
         else:
             print("Already in List")
+        sock.close()
         transport.close()
 
     def run(self):
         handler = BackEndHandler()
         proc = Processor(handler)
         trans_svr = TSocket.TServerSocket(port=self.portBE)
-        trans_fac = TTransport.TBufferedTransportFactory()
+        trans_fac = TTransport.TFramedTransportFactory()
         proto_fac = TBinaryProtocol.TBinaryProtocolFactory()
-        server = TServer.TSimpleServer(proc, trans_svr, trans_fac, proto_fac)
+        server = TNonblockingServer.TNonblockingServer(proc, trans_svr, proto_fac)
 
         print(f"[Server] Started on port {self.portBE}")
         server.serve()
-
-
-class BENode:
-    def __init__(self, hostName, portNum):
-        self.hostName = hostName
-        self.portNum = portNum
-        self.BENodeTransport, self.BENodeClient = None, None
-        self.establishConnection()
-
-    def establishConnection(self):
-        sock = TSocket.TSocket(host=self.hostName, port=self.portNum)
-        self.BENodeTransport = TTransport.TFramedTransport(sock)
-        protocol = TBinaryProtocol.TBinaryProtocol(self.BENodeTransport)
-        self.BENodeClient = ClientBE(protocol)
-
-    def getTransport(self):
-        return self.BENodeTransport
-
-    def getClient(self):
-        return self.BENodeClient
-
-    def getInfo(self):
-        return self.hostName, self.portNum
 
 
 def main():

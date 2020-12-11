@@ -20,7 +20,8 @@ from utils.models import Net
 import torch
 from torch.utils.data import Subset
 from torch import optim
-import torch.functional as F
+import torch.nn.functional as F
+from torchvision import datasets, transforms
 
 
 class BackEndHandler(Client):
@@ -28,38 +29,48 @@ class BackEndHandler(Client):
     def __init__(self):
         self.nodeList = {}
         self.model = Net()
-        self.trainset = None
-        self.learning_rate = 0.99
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])
+        self.trainset = datasets.MNIST(
+            root="./../data",
+            train=True,
+            download=True,
+            transform=self.transform
+        )
+        self.learning_rate = 0.01
         self.momentum = 0.5
 
     def trainNetworkBE(self, stateDictFile, indices, outputFile):
+
+        print(f"Received {stateDictFile}, {len(indices)}, {outputFile} as input.")
 
         # load model
         self.model.load_state_dict(torch.load(stateDictFile))
 
         # load dataset
         data = Subset(self.trainset, indices)
-        loader = torch.utils.data.DataLoader(data, batch_size=4, shuffle=False)
+        loader = torch.utils.data.DataLoader(data, batch_size=64, shuffle=False)
 
         # initialize optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)
 
         # train model
         self.model.train()
-        accuracy = 0
         for batch_idx, (data, target) in enumerate(loader):
             optimizer.zero_grad()
             output = self.model(data)
             loss = F.nll_loss(output, target)
-            accuracy += loss / len(output)
             loss.backward()
             optimizer.step()
 
         # save model state
         torch.save(self.model.state_dict(), outputFile)
 
-        # return accuracy
-        return accuracy
+        # return
+        print("completed training")
+        return True
 
 
 

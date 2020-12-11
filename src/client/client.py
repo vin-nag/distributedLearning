@@ -31,7 +31,7 @@ class Client:
 
     def run(self):
         trans = TSocket.TSocket(self.hostName, self.portFE)
-        trans = TTransport.TBufferedTransport(trans)
+        trans = TTransport.TFramedTransport(trans)
         proto = TBinaryProtocol.TBinaryProtocol(trans)
         client = FrontEnd.Client(proto)
 
@@ -47,8 +47,8 @@ def main():
                         help='host name (default: localhost)')
     parser.add_argument('--portFE', type=int, default=9090,
                         help='port number (default: 9090)')
-    parser.add_argument('--epochs', type=int, default=5,
-                        help='number of epochs (default: 5)')
+    parser.add_argument('--epochs', type=int, default=3,
+                        help='number of epochs (default: 3)')
 
     args = parser.parse_args()
     node = Client(args.host, args.portFE, args.epochs)

@@ -1,8 +1,7 @@
 
 struct ResultFE {
-    1: required list<double> trainAccuracy;
-    2: required list<double> testAccuracy;
-    3: required list<double> times;
+    1: required list<double> accuracy;
+    3: required double time;
 }
 
 struct ResultBE {
@@ -10,10 +9,10 @@ struct ResultBE {
 }
 
 service FrontEnd {
-    ResultFE trainNetwork (1: i16 epochs );
+    oneway void trainNetwork (1: i16 epochs );
     bool registerNode (1: string hostVal, 2: i16 portNum);
 }
 
 service BackEnd {
-    double trainNetworkBE (1: string stateDictFile, 2: list<i32> indices, 3: string outputFile);
+    bool trainNetworkBE (1: string stateDictFile, 2: list<i32> indices, 3: string outputFile);
 }

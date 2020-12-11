@@ -1,3 +1,17 @@
+"""
+This file contains the code for the model architectures.
+
+Date:
+    December 10, 2020
+
+Project:
+    ECE751 Final Project: Distributed Neural Network Learning
+
+Authors:
+    name: Vineel Nagisetty, Husayn Kara
+    contact: vineel.nagisetty@uwaterloo.ca
+"""
+
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import flatten
