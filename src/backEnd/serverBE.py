@@ -14,6 +14,7 @@ Authors:
 
 import sys
 sys.path.append("../gen-py")
+sys.path.append("../utils")
 
 from project.BackEnd import Processor
 from thrift.transport import TSocket, TSSLSocket
