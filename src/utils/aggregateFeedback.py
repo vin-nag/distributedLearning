@@ -11,8 +11,10 @@ Authors:
     name: Vineel Nagisetty, Husayn Kara
     contact: vineel.nagisetty@uwaterloo.ca
 """
+import sys
+sys.path.append("../../src")
 
-from src.utils.models import Net
+from utils.models import Net
 import torch
 import copy
 

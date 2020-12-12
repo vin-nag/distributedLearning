@@ -14,13 +14,14 @@ Authors:
 
 import sys
 sys.path.append("../gen-py")
+sys.path.append("../../src")
 
 from project.FrontEnd import Processor
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TNonblockingServer
-from src.frontEnd.serviceFE import FrontEndHandler
+from frontEnd.serviceFE import FrontEndHandler
 
 import argparse
 

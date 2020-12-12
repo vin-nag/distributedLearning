@@ -12,6 +12,9 @@ Authors:
     contact: vineel.nagisetty@uwaterloo.ca
 """
 
+import sys
+sys.path.append("../../src")
+
 import torch
 import random
 from torchvision import datasets, transforms

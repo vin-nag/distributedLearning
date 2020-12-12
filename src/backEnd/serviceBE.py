@@ -16,7 +16,7 @@ import sys
 sys.path.append('gen-py')
 
 from project.BackEnd import Client
-from src.utils.models import Net
+from utils.models import Net
 import torch
 from torch.utils.data import Subset
 from torch import optim

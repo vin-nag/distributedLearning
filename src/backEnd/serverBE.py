@@ -14,7 +14,6 @@ Authors:
 
 import sys
 sys.path.append("../gen-py")
-sys.path.append("../../src")
 
 from project.BackEnd import Processor
 from thrift.transport import TSocket, TSSLSocket
@@ -23,7 +22,7 @@ from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer, TNonblockingServer
 from project.BackEnd import Client as ClientBE
 from project.FrontEnd import Client as ClientFE
-from src.backEnd.serviceBE import BackEndHandler
+from backEnd.serviceBE import BackEndHandler
 import argparse
 
 
