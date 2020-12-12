@@ -25,7 +25,6 @@ from torchvision import datasets, transforms
 
 
 class BackEndHandler(Client):
-
     def __init__(self):
         self.nodeList = {}
         self.model = Net()
@@ -43,7 +42,13 @@ class BackEndHandler(Client):
         self.momentum = 0.5
 
     def trainNetworkBE(self, stateDictFile, indices, outputFile):
+        """
 
+        :param stateDictFile:
+        :param indices:
+        :param outputFile:
+        :return:
+        """
         print(f"Received {stateDictFile}, {len(indices)}, {outputFile} as input.")
 
         # load model
@@ -58,10 +63,12 @@ class BackEndHandler(Client):
 
         # train model
         self.model.train()
+        total_loss = 0.0
         for batch_idx, (data, target) in enumerate(loader):
             optimizer.zero_grad()
             output = self.model(data)
             loss = F.nll_loss(output, target)
+            total_loss += loss.item()
             loss.backward()
             optimizer.step()
 
@@ -70,9 +77,4 @@ class BackEndHandler(Client):
 
         # return
         print("completed training")
-        return True
-
-
-
-
-
+        return total_loss

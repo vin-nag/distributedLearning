@@ -55,7 +55,6 @@ class BENodeServer:
         handler = BackEndHandler()
         proc = Processor(handler)
         trans_svr = TSocket.TServerSocket(port=self.portBE)
-        trans_fac = TTransport.TFramedTransportFactory()
         proto_fac = TBinaryProtocol.TBinaryProtocolFactory()
         server = TNonblockingServer.TNonblockingServer(proc, trans_svr, proto_fac)
 

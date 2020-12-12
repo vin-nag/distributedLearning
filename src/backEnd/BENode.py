@@ -1,3 +1,17 @@
+"""
+This file contains the code for the back-end server.
+
+Date:
+    December 10, 2020
+
+Project:
+    ECE751 Final Project: Distributed Neural Network Learning
+
+Authors:
+    name: Vineel Nagisetty, Husayn Kara
+    contact: vineel.nagisetty@uwaterloo.ca
+"""
+
 from thrift.transport import TSocket, TSSLSocket
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TTransport

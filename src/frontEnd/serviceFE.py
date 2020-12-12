@@ -22,6 +22,7 @@ from utils.models import Net
 from torch import save, load
 import torch.nn.functional as F
 import torch
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from utils.splitData import splitData
 import time
@@ -29,7 +30,6 @@ from concurrent.futures import ThreadPoolExecutor
 from utils.aggregateFeedback import aggregateFeedback
 import concurrent
 from thrift.Thrift import TException
-import asyncio
 
 
 class FrontEndHandler(Client):
@@ -56,6 +56,14 @@ class FrontEndHandler(Client):
             return False
 
     def delegateEachWork(self, key, modelFile, indices, outputFile):
+        """
+
+        :param key:
+        :param modelFile:
+        :param indices:
+        :param outputFile:
+        :return:
+        """
         transport = self.nodeMap[key].getTransport()
         if not transport.isOpen():
             transport.open()
@@ -63,21 +71,26 @@ class FrontEndHandler(Client):
         return client.trainNetworkBE(modelFile, indices, outputFile)
 
     def trainNetwork(self, epochs):
+        """
 
+        :param epochs:
+        :return:
+        """
         # experiment constants
         batch_size = 64
         learning_rate = 1.0
         gamma = 0.7
         modelFile = "./../data/state.pt"
+        splitMethod = "random"
+        aggregateMethod = "weighted"
 
         model = Net()
         save(model.state_dict(), modelFile)
 
         numOfWorkers = len(self.nodeMap)
-        print(numOfWorkers)
 
         keys = list(self.nodeMap.keys())
-        indices = splitData(6000, numWorkers=numOfWorkers)
+        indices = splitData(6000, numWorkers=numOfWorkers, method=splitMethod)
         outputFiles = [f"./../data/state{self.nodeMap[key].getInfo()}.pt" for key in keys]
         clients = [self.nodeMap[key].getClient() for key in keys]
 
@@ -87,7 +100,7 @@ class FrontEndHandler(Client):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         test_data = datasets.MNIST('./../data', train=False, transform=transform)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size)
+        test_loader = DataLoader(test_data, batch_size)
 
         accuracy = []
 
@@ -98,7 +111,7 @@ class FrontEndHandler(Client):
             model.train()
             print(f"epoch: {j+1}")
 
-            with ThreadPoolExecutor(max_workers=epochs*numOfWorkers) as executor:
+            with ThreadPoolExecutor(max_workers=numOfWorkers) as executor:
                 loss = []
                 future_to_BE = {executor.submit(self.delegateEachWork, keys[i], modelFile, indices[i], outputFiles[i]): i for i in range(numOfWorkers)}
                 for future in concurrent.futures.as_completed(future_to_BE):
@@ -106,9 +119,9 @@ class FrontEndHandler(Client):
                     try:
                         loss.append(future.result())
                     except Exception as exc:
-                        print(f"generated exception {ex}")
+                        print(f"generated exception {exc}")
 
-            model = aggregateFeedback(outputFiles)
+            model = aggregateFeedback(outputFiles, loss, method=aggregateMethod)
             save(model.state_dict(), modelFile)
 
             # test the model
@@ -124,7 +137,7 @@ class FrontEndHandler(Client):
             print(f"epoch: {j+1} accuracy: {val}")
             accuracy.append(val)
 
-        print(accuracy, time.time() - start_time)
+        print(accuracy, time.time()-start_time)
 
         return ResultFE(accuracy, time.time() - start_time)
 
