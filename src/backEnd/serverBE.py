@@ -24,8 +24,6 @@ from thrift.server import TServer, TNonblockingServer
 from project.BackEnd import Client as ClientBE
 from project.FrontEnd import Client as ClientFE
 from backEnd.serviceBE import BackEndHandler
-import aiothrift
-import socket
 import argparse
 
 
