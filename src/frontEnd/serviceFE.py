@@ -17,17 +17,17 @@ sys.path.append("gen-py")
 
 from project.FrontEnd import Client
 from project.ttypes import ResultFE
-from backEnd.BENode import BENode
-from utils.models import Net
+from src.backEnd.BENode import BENode
+from src.utils.models import Net
 from torch import save, load
 import torch.nn.functional as F
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from utils.splitData import splitData
+from src.utils.splitData import splitData
 import time
 from concurrent.futures import ThreadPoolExecutor
-from utils.aggregateFeedback import aggregateFeedback
+from src.utils.aggregateFeedback import aggregateFeedback
 import concurrent
 from thrift.Thrift import TException
 

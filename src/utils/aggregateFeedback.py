@@ -12,7 +12,7 @@ Authors:
     contact: vineel.nagisetty@uwaterloo.ca
 """
 
-from utils.models import Net
+from src.utils.models import Net
 import torch
 import copy
 
