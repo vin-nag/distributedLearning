@@ -56,7 +56,7 @@ class BackEndHandler(Client):
 
         # load dataset
         data = Subset(self.trainset, indices)
-        loader = torch.utils.data.DataLoader(data, batch_size=64, shuffle=False)
+        loader = torch.utils.data.DataLoader(data, batch_size=64, shuffle=True)
 
         # initialize optimizer
         optimizer = optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=self.momentum)

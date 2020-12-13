@@ -21,6 +21,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
 import argparse
+import pandas as pd
 
 
 class Client:
@@ -28,6 +29,8 @@ class Client:
         self.hostName = hostName
         self.portFE = portFE
         self.epochs = epochs
+        self.results = pd.DataFrame(columns=('numWorkers', 'splitMethod', 'aggregateMethod', 'epochs', 'accuracies', 'time'))
+
 
     def run(self):
         trans = TSocket.TSocket(self.hostName, self.portFE)
@@ -35,10 +38,24 @@ class Client:
         proto = TBinaryProtocol.TBinaryProtocol(trans)
         client = FrontEnd.Client(proto)
 
+        splitMethods = ["random", "class", "equal"]
+        aggregateMethods = ["average", "weighted"]
+
+
+        splitMethod = "equal"
+        aggregateMethod = "average"
+
         trans.open()
-        result = client.trainNetwork(self.epochs)
-        print(f"[Client] received: {result}")
+        i = 0
+        # for splitMethod in splitMethods:
+        #     for aggregateMethod in aggregateMethods:
+        result = client.trainNetwork(self.epochs, splitMethod=splitMethod, aggregateMethod=aggregateMethod)
+        print(f"[Client] received: {result}, splitMethod: {splitMethod}, aggregateMethod: {aggregateMethod}")
+        self.results.loc[i] = [result.numWorkers, splitMethod, aggregateMethod, self.epochs,
+                          result.accuracies, result.time]
+        i += 1
         trans.close()
+        self.results.to_pickle("./../results/nodeExperiment10.pkl")
 
 
 def main():
@@ -47,8 +64,8 @@ def main():
                         help='host name (default: localhost)')
     parser.add_argument('--portFE', type=int, default=9090,
                         help='port number (default: 9090)')
-    parser.add_argument('--epochs', type=int, default=3,
-                        help='number of epochs (default: 3)')
+    parser.add_argument('--epochs', type=int, default=5,
+                        help='number of epochs (default: 5)')
 
     args = parser.parse_args()
     node = Client(args.host, args.portFE, args.epochs)

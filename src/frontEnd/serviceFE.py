@@ -72,19 +72,18 @@ class FrontEndHandler(Client):
         client = self.nodeMap[key].getClient()
         return client.trainNetworkBE(modelFile, indices, outputFile)
 
-    def trainNetwork(self, epochs):
+    def trainNetwork(self, epochs, splitMethod, aggregateMethod):
         """
-
+        This function performs the main Downpour-SGD algorithm
         :param epochs:
+        :param splitMethod:
+        :param aggregateMethod:
         :return:
         """
-        # experiment constants
         batch_size = 64
         learning_rate = 1.0
         gamma = 0.7
         modelFile = "./../data/state.pt"
-        splitMethod = "random"
-        aggregateMethod = "weighted"
 
         model = Net()
         save(model.state_dict(), modelFile)
@@ -92,7 +91,7 @@ class FrontEndHandler(Client):
         numOfWorkers = len(self.nodeMap)
 
         keys = list(self.nodeMap.keys())
-        indices = splitData(6000, numWorkers=numOfWorkers, method=splitMethod)
+        indices = splitData(60000, numWorkers=numOfWorkers, method=splitMethod)
         outputFiles = [f"./../data/state{self.nodeMap[key].getInfo()}.pt" for key in keys]
         clients = [self.nodeMap[key].getClient() for key in keys]
 
@@ -111,7 +110,6 @@ class FrontEndHandler(Client):
 
             # train the model
             model.train()
-            print(f"epoch: {j+1}")
 
             with ThreadPoolExecutor(max_workers=numOfWorkers) as executor:
                 loss = []
@@ -130,16 +128,20 @@ class FrontEndHandler(Client):
             model.eval()
             test_loss = 0
             correct = 0
+            number_classes = 10
+            confusion_matrix = torch.zeros(number_classes, number_classes)
             with torch.no_grad():
                 for data, target in test_loader:
                     output = model(data)
                     pred = output.argmax(dim=1, keepdim=True)
                     correct += pred.eq(target.view_as(pred)).sum().item()
+                    for t, p in zip(target.view(-1), pred.view(-1)):
+                        confusion_matrix[t.long(), p.long()] += 1
             val = 100. * correct / len(test_loader.dataset)
+
+            print(confusion_matrix.diag() / confusion_matrix.sum(1))
             print(f"epoch: {j+1} accuracy: {val}")
             accuracy.append(val)
 
-        print(accuracy, time.time()-start_time)
-
-        return ResultFE(accuracy, time.time() - start_time)
+        return ResultFE(accuracy, time.time()-start_time, numOfWorkers)
 

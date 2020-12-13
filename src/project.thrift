@@ -1,7 +1,8 @@
 
 struct ResultFE {
-    1: required list<double> accuracy;
-    3: required double time;
+    1: required list<double> accuracies;
+    2: required double time;
+    3: required i16 numWorkers;
 }
 
 struct ResultBE {
@@ -9,7 +10,7 @@ struct ResultBE {
 }
 
 service FrontEnd {
-    ResultFE trainNetwork (1: i16 epochs );
+    ResultFE trainNetwork (1: i16 epochs 2: string splitMethod, 3: string aggregateMethod );
     bool registerNode (1: string hostVal, 2: i16 portNum);
 }
 
