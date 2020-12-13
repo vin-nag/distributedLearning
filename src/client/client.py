@@ -42,20 +42,21 @@ class Client:
         aggregateMethods = ["average", "weighted"]
 
 
-        splitMethod = "equal"
+        splitMethod = "random"
         aggregateMethod = "average"
 
         trans.open()
         i = 0
         # for splitMethod in splitMethods:
         #     for aggregateMethod in aggregateMethods:
-        result = client.trainNetwork(self.epochs, splitMethod=splitMethod, aggregateMethod=aggregateMethod)
-        print(f"[Client] received: {result}, splitMethod: {splitMethod}, aggregateMethod: {aggregateMethod}")
-        self.results.loc[i] = [result.numWorkers, splitMethod, aggregateMethod, self.epochs,
-                          result.accuracies, result.time]
-        i += 1
+        for i in range(3):
+            result = client.trainNetwork(self.epochs, splitMethod=splitMethod, aggregateMethod=aggregateMethod)
+            print(f"[Client] received: {result}, splitMethod: {splitMethod}, aggregateMethod: {aggregateMethod}")
+            self.results.loc[i] = [result.numWorkers, splitMethod, aggregateMethod, self.epochs,
+                              result.accuracies, result.time]
+            i += 1
         trans.close()
-        self.results.to_pickle("./../results/nodeExperiment10.pkl")
+        self.results.to_pickle("./../results/nodesThree.pkl")
 
 
 def main():

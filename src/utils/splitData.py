@@ -31,7 +31,7 @@ def splitData(dataSize, numWorkers, method="random"):
     :return:
     """
     if numWorkers == 1:
-        return [x for x in range(dataSize)]
+        return [[x for x in range(dataSize)]]
 
     if method == "random":
         lst = [x for x in range(dataSize)]
