@@ -1,4 +1,4 @@
-*Analyzing Variations in Distributed Deep Neural Network Learning*
+# Analyzing Variations in Distributed Deep Neural Network Learning
 
 By Vineel Nagisetty; Husayn Kara; 
 
@@ -21,5 +21,3 @@ Our project implements Downpour Stochastic Gradient Descent (Downpour-SGD), an a
  ### Reproduce Results:
  * To reproduce the results shown in the report, please install Thrift and all modules from the `requirements.txt` file and run the front-end, back-end and client servers (in that order)
  
- ## More Info
-- More information is found [here](http://www.cs.mun.ca/~kol/GANs-n-reels/).
