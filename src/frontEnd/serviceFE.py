@@ -105,8 +105,9 @@ class FrontEndHandler(Client):
 
         accuracy = []
 
-        start_time = time.time()
+        time_taken = 0
         for j in range(epochs):
+            start_time = time.time()
 
             # train the model
             model.train()
@@ -124,6 +125,8 @@ class FrontEndHandler(Client):
             model = aggregateFeedback(outputFiles, loss, method=aggregateMethod)
             save(model.state_dict(), modelFile)
 
+            time_taken += time.time() - start_time
+
             # test the model
             model.eval()
             test_loss = 0
@@ -139,9 +142,10 @@ class FrontEndHandler(Client):
                         confusion_matrix[t.long(), p.long()] += 1
             val = 100. * correct / len(test_loader.dataset)
 
+            print(confusion_matrix)
             print(confusion_matrix.diag() / confusion_matrix.sum(1))
             print(f"epoch: {j+1} accuracy: {val}")
             accuracy.append(val)
 
-        return ResultFE(accuracy, time.time()-start_time, numOfWorkers)
+        return ResultFE(accuracy, time_taken, numOfWorkers)
 

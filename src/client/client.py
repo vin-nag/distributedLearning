@@ -25,10 +25,14 @@ import pandas as pd
 
 
 class Client:
-    def __init__(self, hostName, portFE, epochs):
+    def __init__(self, hostName, portFE, epochs, runs, splitMethod, aggregateMethod, outputFile):
         self.hostName = hostName
         self.portFE = portFE
         self.epochs = epochs
+        self.runs = runs
+        self.splitMethod = splitMethod
+        self.aggregateMethod = aggregateMethod
+        self.outputFile = outputFile
         self.results = pd.DataFrame(columns=('numWorkers', 'splitMethod', 'aggregateMethod', 'epochs', 'accuracies', 'time'))
 
 
@@ -42,21 +46,16 @@ class Client:
         aggregateMethods = ["average", "weighted"]
 
 
-        splitMethod = "random"
-        aggregateMethod = "average"
-
         trans.open()
-        i = 0
         # for splitMethod in splitMethods:
         #     for aggregateMethod in aggregateMethods:
-        for i in range(3):
-            result = client.trainNetwork(self.epochs, splitMethod=splitMethod, aggregateMethod=aggregateMethod)
-            print(f"[Client] received: {result}, splitMethod: {splitMethod}, aggregateMethod: {aggregateMethod}")
-            self.results.loc[i] = [result.numWorkers, splitMethod, aggregateMethod, self.epochs,
+        for i in range(self.runs):
+            result = client.trainNetwork(self.epochs, splitMethod=self.splitMethod, aggregateMethod=self.aggregateMethod)
+            print(f"[Client] received: {result}, splitMethod: {self.splitMethod}, aggregateMethod: {self.aggregateMethod}")
+            self.results.loc[i] = [result.numWorkers, self.splitMethod, self.aggregateMethod, self.epochs,
                               result.accuracies, result.time]
-            i += 1
         trans.close()
-        self.results.to_pickle("./../results/nodesThree.pkl")
+        self.results.to_pickle(self.outputFile)
 
 
 def main():
@@ -65,11 +64,19 @@ def main():
                         help='host name (default: localhost)')
     parser.add_argument('--portFE', type=int, default=9090,
                         help='port number (default: 9090)')
-    parser.add_argument('--epochs', type=int, default=5,
-                        help='number of epochs (default: 5)')
+    parser.add_argument('--epochs', type=int, default=2,
+                        help='number of epochs (default: 2)')
+    parser.add_argument('--runs', type=int, default=1,
+                        help='number of runs for each experiment (default: 1)')
+    parser.add_argument('--splitMethod', type=str, default="class",
+                        help='the type of split method (choose between random [default], class and equal)')
+    parser.add_argument('--aggregateMethod', type=str, default="average",
+                        help='the type of aggregation (choose between average [default] and weighted)')
+    parser.add_argument('--outputFile', type=str, default="./../results/nodeSeven.pkl",
+                        help='the name of the file to save results in.')
 
     args = parser.parse_args()
-    node = Client(args.host, args.portFE, args.epochs)
+    node = Client(args.host, args.portFE, args.epochs, args.runs, args.splitMethod, args.aggregateMethod, args.outputFile)
     node.run()
 
 
