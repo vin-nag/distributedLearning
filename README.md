@@ -1,5 +1,6 @@
 # Analyzing Variations in Distributed Deep Neural Network Learning
 
+This project was done as part of the ECE751: Distributed Computing course at the University of Waterloo.
 By Vineel Nagisetty; Husayn Kara; 
 
 ## Table of Contents
