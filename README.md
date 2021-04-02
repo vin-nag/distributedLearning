@@ -21,3 +21,5 @@ Our project implements Downpour Stochastic Gradient Descent (Downpour-SGD), an a
  ### Reproduce Results:
  * To reproduce the results shown in the report, please install Thrift and all modules from the `requirements.txt` file and run the front-end, back-end and client servers (in that order)
  
+## More Info:
+In order to get a better understanding of our implementation and results, ![read](https://github.com/vin-nag/distributedLearning/report.pdf) our report.
